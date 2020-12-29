@@ -39,7 +39,8 @@ func (this *SatellitiesRepo) SatellitiesCount() int {
 
 	var count int
 
-	sqlDb, err := sql.Open("sqlite3", "db/mainDB.db")
+	//La ruta para andar en el google app engine tiene que ser la siguiente: db/mainDB.db
+	sqlDb, err := sql.Open("sqlite3", "mainDB.db")
 
 	if err != nil {
 		this.RegisterState(exestate.UncontrolledError("No se pudo abrir la base", err))
@@ -69,7 +70,8 @@ func (this *SatellitiesRepo) GetAllSatellities() *[]SatellitiesRow {
 		return nil
 	}
 
-	sqlDb, err := sql.Open("sqlite3", "db/mainDB.db")
+	//La ruta para andar en el google app engine tiene que ser la siguiente: db/mainDB.db
+	sqlDb, err := sql.Open("sqlite3", "mainDB.db")
 
 	if err != nil {
 		this.RegisterState(exestate.UncontrolledError("No se pudo abrir la base", err))
@@ -107,7 +109,8 @@ func (this *SatellitiesRepo) GetWithName(name string) *SatellitiesRow {
 		return nil
 	}
 
-	sqlDb, err := sql.Open("sqlite3", "db/mainDB.db")
+	//La ruta para andar en el google app engine tiene que ser la siguiente: db/mainDB.db
+	sqlDb, err := sql.Open("sqlite3", "mainDB.db")
 
 	if err != nil {
 		this.RegisterState(exestate.UncontrolledError("No se pudo abrir la base (db.db.GetWithName)", err))

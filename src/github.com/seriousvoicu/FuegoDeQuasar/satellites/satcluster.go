@@ -1,4 +1,4 @@
-package satellities
+package satellites
 
 import (
 	"math"
@@ -11,7 +11,7 @@ import (
 )
 
 type satcluster struct {
-	Satellities []satellitie `json:"satellities"`
+	Satellites []satellite `json:"satellites"`
 
 	currState *exestate.State
 }
@@ -28,12 +28,12 @@ func (this *satcluster) /*StateHandler.*/ GetState(consume bool) *exestate.State
 	}
 	return state
 }
-func (this *satcluster) getAt(index int) *satellitie {
+func (this *satcluster) getAt(index int) *satellite {
 	if exestate.OnError(this) {
 		return nil
 	}
 
-	return &this.Satellities[index]
+	return &this.Satellites[index]
 }
 
 func (this *satcluster) count() int {
@@ -41,7 +41,7 @@ func (this *satcluster) count() int {
 		return 0
 	}
 
-	return len(this.Satellities)
+	return len(this.Satellites)
 }
 
 func (this *satcluster) isEmpty() bool {
@@ -49,7 +49,7 @@ func (this *satcluster) isEmpty() bool {
 		return true
 	}
 
-	return (len(this.Satellities) <= 0)
+	return (len(this.Satellites) <= 0)
 }
 
 func (this *satcluster) setDistances(distances []float32) {
@@ -132,36 +132,40 @@ func (this *satcluster) getMessage() string {
 		return ""
 	}
 
-	sort.Slice(this.Satellities, func(i, j int) bool {
+	//Ordeno el arreglo de menor a mayor (el menor de los arreglos tiene que ser el del tamaño original del mensaje, caso contrario hay perdida de informacion)
+	sort.Slice(this.Satellites, func(i, j int) bool {
 		return len(this.getAt(i).Message) < len(this.getAt(j).Message)
 	})
 
+	//Mergeo el primer y segundo arreglo, siendo el primero el mas chico de todos
 	message, errorType := arrays.MergeStringArrays(this.getAt(0).Message, this.getAt(1).Message)
 
 	if !errorType.IsOk() {
-		this.RegisterState(exestate.ControlledError("No se pudo determinar el mensaje (satellities.satcluster.getMessage)"))
+		this.RegisterState(exestate.ControlledError("No se pudo determinar el mensaje (satellites.satcluster.getMessage)"))
 		return ""
 	}
 
+	//Mergeo cada arreglo mergeado con el siguiente
 	for i := 2; i < this.count(); i++ {
 		message, errorType = arrays.MergeStringArrays(message, this.getAt(i).Message)
 		if !errorType.IsOk() {
-			this.RegisterState(exestate.ControlledError("No se pudo determinar el mensaje (satellities.satcluster.getMessage)"))
+			this.RegisterState(exestate.ControlledError("No se pudo determinar el mensaje (satellites.satcluster.getMessage)"))
 			return ""
 		}
 	}
 
+	//Verifico si hay elementos vacios en el mensaje final
 	for i := 0; i < len(message); i++ {
 		if message[i] == "" {
-			this.RegisterState(exestate.ControlledError("No se pudo determinar el mensaje (satellities.satcluster.getMessage)"))
+			this.RegisterState(exestate.ControlledError("No se pudo determinar el mensaje (satellites.satcluster.getMessage)"))
 			return ""
 		}
 	}
 
+	//Paso el arreglo a un string
 	finalMsg, _ := arrays.StringArrayToString(message)
-
 	if finalMsg == "" {
-		this.RegisterState(exestate.ControlledError("No se pudo determinar el mensaje (satellities.satcluster.getMessage)"))
+		this.RegisterState(exestate.ControlledError("No se pudo determinar el mensaje (satellites.satcluster.getMessage)"))
 		return ""
 	}
 

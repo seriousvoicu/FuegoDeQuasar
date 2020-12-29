@@ -9,11 +9,11 @@ import (
 
 	"github.com/seriousvoicu/FuegoDeQuasar/db"
 	"github.com/seriousvoicu/FuegoDeQuasar/exestate"
-	"github.com/seriousvoicu/FuegoDeQuasar/satellities"
+	"github.com/seriousvoicu/FuegoDeQuasar/satellites"
 	"github.com/seriousvoicu/FuegoDeQuasar/vectors"
 )
 
-var satellitieManager *satellities.Satmanager
+var satellitieManager *satellites.Satmanager
 
 type Response struct {
 	Pos     vectors.Vector2 `json:"position"`
@@ -22,6 +22,7 @@ type Response struct {
 
 func CreateClusterFromJson(w http.ResponseWriter, r *http.Request) {
 	repo := db.SatellitiesRepo{}
+	//repo := db.SatellitiesRepoEng{}
 	satellitieManager.InstantiateClusterFromJson(r.Body, &repo)
 
 	defer r.Body.Close()
@@ -45,6 +46,8 @@ func CreateClusterFromJson(w http.ResponseWriter, r *http.Request) {
 //Instancia los satelites desde la base, les setea las posiciones especificadas y realiza la triangulacion
 func GetLocation(distances ...float32) (x, y float32) {
 	repo := db.SatellitiesRepo{}
+	//repo := db.SatellitiesRepoEng{}
+
 	satellitieManager.InstantiateClusterFromDB(&repo)
 
 	satellitieManager.SetClusterDistances(distances)
@@ -63,6 +66,8 @@ func GetLocation(distances ...float32) (x, y float32) {
 func GetMessage(messages ...[]string) (msg string) {
 
 	repo := db.SatellitiesRepo{}
+	//repo := db.SatellitiesRepoEng{}
+
 	satellitieManager.InstantiateClusterFromDB(&repo)
 
 	satellitieManager.SetClusterMessages(messages)
@@ -90,9 +95,9 @@ func main() {
 	s := server.New()
 	log.Fatal(http.ListenAndServe(":8080", s.Router()))*/
 
-	satellitieManager = &satellities.Satmanager{}
+	satellitieManager = &satellites.Satmanager{}
 
-	http.HandleFunc("/", CreateClusterFromJson)
+	http.HandleFunc("/topsecret", CreateClusterFromJson)
 
 	port := os.Getenv("PORT")
 	if port == "" {

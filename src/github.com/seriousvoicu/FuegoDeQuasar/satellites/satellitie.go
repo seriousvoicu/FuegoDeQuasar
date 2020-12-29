@@ -1,4 +1,4 @@
-package satellities
+package satellites
 
 import (
 	"strconv"
@@ -8,22 +8,22 @@ import (
 	"github.com/seriousvoicu/FuegoDeQuasar/vectors"
 )
 
-type satellitie struct {
+type satellite struct {
 	Name     string   `json:"name"`
 	Distance float64  `json:"distance"`
 	Message  []string `json:"message"`
 	Pos      *vectors.Vector2
 }
 
-func (this satellitie) /*Circle.*/ Radious() float64 {
+func (this satellite) /*Circle.*/ Radious() float64 {
 	return this.Distance
 }
 
-func (this satellitie) /*Circle.*/ Position() *vectors.Vector2 {
+func (this satellite) /*Circle.*/ Position() *vectors.Vector2 {
 	return this.Pos
 }
 
-func (this *satellitie) ToString() string {
+func (this *satellite) ToString() string {
 	str := ""
 	str += "Name: " + this.Name + " - "
 	str += "Distancia: " + strconv.FormatFloat(this.Distance, 'f', -1, 64) + " - "

@@ -1,4 +1,4 @@
-package satellities
+package satellites
 
 import (
 	"encoding/json"
@@ -28,6 +28,7 @@ func (this *Satmanager) /*StateHandler.*/ GetState(consume bool) *exestate.State
 	return state
 }
 
+//Carga cada satelite con la posiciones especificadas
 func (this *Satmanager) SetClusterDistances(distances []float32) {
 	if exestate.OnError(this) {
 		return
@@ -44,6 +45,7 @@ func (this *Satmanager) SetClusterDistances(distances []float32) {
 	}
 }
 
+//Le carga elmensaje a cada satelite
 func (this *Satmanager) SetClusterMessages(messages [][]string) {
 	if exestate.OnError(this) {
 		return
@@ -60,6 +62,7 @@ func (this *Satmanager) SetClusterMessages(messages [][]string) {
 	}
 }
 
+//Instancia un conjunto de satelites desde un json
 func (this *Satmanager) InstantiateClusterFromJson(jsonInput io.Reader, dbRepo db.SatellitiesRepoInterface) {
 	if exestate.OnError(this) {
 		return
@@ -72,6 +75,9 @@ func (this *Satmanager) InstantiateClusterFromJson(jsonInput io.Reader, dbRepo d
 		this.RegisterState(exestate.UncontrolledError("Error en el procesamiento del json", err))
 		return
 	}
+
+	//Damos por hecho que no hay posiciones definidas desde el json, pues los satelites tienen posicion fija
+	//Los levanto desde la base
 	service := db.SatellitieService{Satrepo: dbRepo}
 	for i := 0; i < cluster.count(); i++ {
 		pos := service.GetSatellitiePosition(cluster.getAt(i).Name)
@@ -88,6 +94,8 @@ func (this *Satmanager) InstantiateClusterFromJson(jsonInput io.Reader, dbRepo d
 
 }
 
+//Instancia los satelites desde la base
+//La base solo posee los datos fijos, como nombre y posicon
 func (this *Satmanager) InstantiateClusterFromDB(dbRepo db.SatellitiesRepoInterface) {
 	if exestate.OnError(this) {
 		return
@@ -102,23 +110,24 @@ func (this *Satmanager) InstantiateClusterFromDB(dbRepo db.SatellitiesRepoInterf
 	}
 
 	if rows == nil || len(*rows) <= 0 {
-		this.RegisterState(exestate.ControlledError("No se pudieron obtener satelites (satellities.satmanager.InstantiateClusterFromDB)"))
+		this.RegisterState(exestate.ControlledError("No se pudieron obtener satelites (satellite.satmanager.InstantiateClusterFromDB)"))
 		return
 	}
 
 	var cluster satcluster
-	cluster.Satellities = make([]satellitie, len(*rows)) //[count]Satellitie //Init array
+	cluster.Satellites = make([]satellite, len(*rows)) //[count]satellite //Init array
 
 	for i := 0; i < len(*rows); i++ {
-		cluster.Satellities[i] = satellitie{Name: (*rows)[i].Name, Pos: &vectors.Vector2{X: float64((*rows)[i].Position_x), Y: float64((*rows)[i].Position_y)}}
+		cluster.Satellites[i] = satellite{Name: (*rows)[i].Name, Pos: &vectors.Vector2{X: float64((*rows)[i].Position_x), Y: float64((*rows)[i].Position_y)}}
 	}
 
 	this.cluster = &cluster
 }
 
+//Obtiene el mensaje resultante de mergear los mensajes recibidos en cada satelite
 func (this *Satmanager) GetMessage() string {
 	if this.cluster == nil {
-		this.RegisterState(exestate.ControlledError("Cluster no inicializado (satellities.Satmanager.GetMessage)"))
+		this.RegisterState(exestate.ControlledError("Cluster no inicializado (satellite.Satmanager.GetMessage)"))
 		return ""
 	}
 
@@ -136,6 +145,7 @@ func (this *Satmanager) GetMessage() string {
 	return msg
 }
 
+//Devuelve la ubicacion del emisor de los mensajes
 func (this *Satmanager) GetLocation() vectors.Vector2 {
 
 	if this.cluster == nil {

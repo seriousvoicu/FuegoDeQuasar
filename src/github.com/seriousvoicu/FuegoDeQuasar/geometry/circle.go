@@ -15,6 +15,7 @@ type Circle interface {
 //Retorno los puntos de interseccion. Puede haber 2, 1 o ninguno.
 func GetCirclesIntersections(circleA Circle, circleB Circle) (vectors.Vector2, vectors.Vector2, *exestate.State) {
 
+	//Antes que nada evaluo si puede haber interseccion
 	possible, state := IsCirclesIntersectionPossible(circleA, circleB)
 
 	if !state.IsOk() {
@@ -22,6 +23,8 @@ func GetCirclesIntersections(circleA Circle, circleB Circle) (vectors.Vector2, v
 	} else if !possible {
 		return vectors.GetEmptyVector2(), vectors.GetEmptyVector2(), exestate.ControlledError("No existe interseccion (geometry.IsCirclesIntersectionPossible)")
 	}
+
+	//Calculo la interseccion de los circulos
 
 	var d = circleA.Position().DistanceTo(circleB.Position()) // math.Hypot(posTwo.x-posOne.x, posTwo.y-posOne.y) //Distancia entre ambos puntos
 
@@ -47,6 +50,7 @@ func GetCirclesIntersections(circleA Circle, circleB Circle) (vectors.Vector2, v
 	return vectors.GetEmptyVector2(), vectors.GetEmptyVector2(), exestate.Ok()
 }
 
+//El valor menor que 0.0001 lo redondeo a cero
 func RoundZero(v float64) float64 {
 	if math.Abs(v) <= 0.0001 {
 		v = 0

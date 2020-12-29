@@ -1,9 +1,7 @@
-package satellities
+package satellites
 
 import (
 	"io"
-	"log"
-	"strconv"
 	"testing"
 
 	db "github.com/seriousvoicu/FuegoDeQuasar/db"
@@ -23,7 +21,6 @@ type testIoReader struct {
 func (this *testIoReader) Read(b []byte) (n int, err error) {
 	if this.data == nil {
 		//var satArray []satellitie
-		log.Printf("test %s", strconv.Itoa(this.testID))
 		if this.testID == 0 {
 			/*satArray := []satellitie{
 				satellitie{Name: "test1", Pos: &vectors.Vector2{X: 5, Y: 5}},
@@ -85,8 +82,8 @@ func (this *testSatellitiesRepo) /*StateHandler.*/ GetState(consume bool) *exest
 	return state
 }
 
-func (this *testSatellitiesRepo) SatellitiesCount() *int {
-	return nil
+func (this *testSatellitiesRepo) SatellitiesCount() int {
+	return -1
 }
 
 func (this *testSatellitiesRepo) GetAllSatellities() *[]db.SatellitiesRow {
@@ -129,7 +126,7 @@ func (this *testSatellitiesRepo) GetWithName(name string) *db.SatellitiesRow {
 	return nil
 }
 
-func satArrayToString(arrayA []satellitie) string {
+func satArrayToString(arrayA []satellite) string {
 
 	str := ""
 
@@ -141,7 +138,7 @@ func satArrayToString(arrayA []satellitie) string {
 	return str
 }
 
-func satArrayEquals(arrayA []satellitie, arrayB []satellitie) bool {
+func satArrayEquals(arrayA []satellite, arrayB []satellite) bool {
 
 	if len(arrayA) != len(arrayB) {
 		return false
@@ -157,13 +154,16 @@ func satArrayEquals(arrayA []satellitie, arrayB []satellitie) bool {
 	return true
 }
 
-func satEqual(satA *satellitie, satB *satellitie) bool {
+func satEqual(satA *satellite, satB *satellite) bool {
 
 	if satA == nil || satB == nil {
 		return false
 	}
 
-	posEqual, _ := vectors.Equals(*satA.Pos, *satB.Pos)
+	posEqual := true
+	if satA.Pos != nil && satB.Pos != nil {
+		posEqual, _ = vectors.Equals(*satA.Pos, *satB.Pos)
+	}
 
 	if satA.Name == satB.Name && posEqual {
 		return true
@@ -216,20 +216,27 @@ func satEqual(satA *satellitie, satB *satellitie) bool {
 }*/
 
 //func (this *Satmanager) InstantiateClusterFromJson(jsonInput io.Reader, dbRepo db.SatellitiesRepoInterface) {
-/*func TestInstantiateClusterFromJson(t *testing.T) {
+func TestInstantiateClusterFromJson(t *testing.T) {
 	var testTable = []struct {
 		name     string
 		testCode int
-		spected  []satellitie
+		jsonTxt  string
+		spected  []satellite
 		errMsg   string
 	}{
 		{
 			"TestA satelites normal",
 			0,
-			[]satellitie{
-				satellitie{Name: "test1", Distance: 5},
-				satellitie{Name: "test2", Distance: 5},
-				satellitie{Name: "test3", Distance: 5},
+			`{"satellites":
+				[
+					{"name":"test1","distance":100.0,"message":["este","","","mensaje",""]},
+					{"name":"test2","distance":115.5,"message":["","es","","","secreto"]},
+					{"name":"test3","distance":142.7,"message":["este","","un","",""]}
+				]}`,
+			[]satellite{
+				satellite{Name: "test1", Distance: 5},
+				satellite{Name: "test2", Distance: 5},
+				satellite{Name: "test3", Distance: 5},
 			},
 			"",
 		},
@@ -240,21 +247,21 @@ func satEqual(satA *satellitie, satB *satellitie) bool {
 	for _, tt := range testTable {
 		t.Run(tt.name, func(t *testing.T) {
 
-			manager.InstantiateClusterFromJson(&testIoReader{testID: tt.testCode, readIndex: 0}, &testSatellitiesRepo{})
+			manager.InstantiateClusterFromJson(&testIoReader{jsonTxt: tt.jsonTxt, testID: tt.testCode, readIndex: 0}, &testSatellitiesRepo{})
 
 			if exestate.OnError(&manager) {
 				t.Errorf(manager.GetState(true).UserError)
 				return
 			}
 
-			if !satArrayEquals(tt.spected, manager.cluster.Satellities) {
-				t.Errorf("got %q, want %q", satArrayToString(manager.cluster.Satellities), satArrayToString(tt.spected))
+			if !satArrayEquals(tt.spected, manager.cluster.Satellites) {
+				t.Errorf("got %q, want %q", satArrayToString(manager.cluster.Satellites), satArrayToString(tt.spected))
 			}
 
 		})
 	}
 
-}*/
+}
 
 //func (this *Satmanager) SetClusterMessages(messages [][]string) {
 
@@ -270,69 +277,69 @@ func TestGetMessage(t *testing.T) {
 	}{
 		{
 			"Test ok",
-			Satmanager{cluster: &satcluster{Satellities: []satellitie{
-				satellitie{Message: []string{"a", "", ""}},
-				satellitie{Message: []string{"", "b", ""}},
-				satellitie{Message: []string{"", "", "c"}},
+			Satmanager{cluster: &satcluster{Satellites: []satellite{
+				satellite{Message: []string{"a", "", ""}},
+				satellite{Message: []string{"", "b", ""}},
+				satellite{Message: []string{"", "", "c"}},
 			}}},
 			"a b c",
 			"",
 		},
 		{
 			"Celda sin poder determinar",
-			Satmanager{cluster: &satcluster{Satellities: []satellitie{
-				satellitie{Message: []string{"", "a", "", ""}},
-				satellitie{Message: []string{"", "", "b", ""}},
-				satellitie{Message: []string{"", "", "", "c"}},
+			Satmanager{cluster: &satcluster{Satellites: []satellite{
+				satellite{Message: []string{"", "a", "", ""}},
+				satellite{Message: []string{"", "", "b", ""}},
+				satellite{Message: []string{"", "", "", "c"}},
 			}}},
 			"",
-			"No se pudo determinar el mensaje (satellities.satcluster.getMessage)",
+			"No se pudo determinar el mensaje (satellites.satcluster.getMessage)",
 		},
 		{
 			"Celda sin poder determinar",
-			Satmanager{cluster: &satcluster{Satellities: []satellitie{
-				satellitie{Message: []string{"", "a", " ", ""}},
-				satellitie{Message: []string{"", " ", "b", ""}},
-				satellitie{Message: []string{"", "", "", "c"}},
+			Satmanager{cluster: &satcluster{Satellites: []satellite{
+				satellite{Message: []string{"", "a", " ", ""}},
+				satellite{Message: []string{"", " ", "b", ""}},
+				satellite{Message: []string{"", "", "", "c"}},
 			}}},
 			"",
-			"No se pudo determinar el mensaje (satellities.satcluster.getMessage)",
+			"No se pudo determinar el mensaje (satellites.satcluster.getMessage)",
 		},
 		{
 			"Celda sin poder determinar",
-			Satmanager{cluster: &satcluster{Satellities: []satellitie{
-				satellitie{Message: []string{"", "a", " ", ""}},
-				satellitie{Message: []string{"", " ", "b", ""}},
-				satellitie{Message: nil},
+			Satmanager{cluster: &satcluster{Satellites: []satellite{
+				satellite{Message: []string{"", "a", " ", ""}},
+				satellite{Message: []string{"", " ", "b", ""}},
+				satellite{Message: nil},
 			}}},
 			"",
-			"No se pudo determinar el mensaje (satellities.satcluster.getMessage)",
+			"No se pudo determinar el mensaje (satellites.satcluster.getMessage)",
 		},
 		{
 			"Celda sin poder determinar",
-			Satmanager{cluster: &satcluster{Satellities: []satellitie{
-				satellitie{Message: []string{"", "a", " ", "/"}},
-				satellitie{Message: []string{"", "-", "b", ""}},
-				satellitie{Message: []string{"", " ", "b", ""}},
+			Satmanager{cluster: &satcluster{Satellites: []satellite{
+				satellite{Message: []string{"", "a", " ", "/"}},
+				satellite{Message: []string{"", "-", "b", ""}},
+				satellite{Message: []string{"", " ", "b", ""}},
 			}}},
 			"",
-			"No se pudo determinar el mensaje (satellities.satcluster.getMessage)",
+			"No se pudo determinar el mensaje (satellites.satcluster.getMessage)",
 		},
 		{
 			"Celda sin poder determinar",
-			Satmanager{cluster: &satcluster{Satellities: []satellitie{
-				satellitie{Message: []string{"a", "", "", ""}},
-				satellitie{Message: []string{"", "b", ""}},
-				satellitie{Message: []string{"", "", "c"}},
+			Satmanager{cluster: &satcluster{Satellites: []satellite{
+				satellite{Message: []string{"a", "", "", ""}},
+				satellite{Message: []string{"", "b", ""}},
+				satellite{Message: []string{"", "", "c"}},
 			}}},
 			"",
-			"No se pudo determinar el mensaje (satellities.satcluster.getMessage)",
+			"No se pudo determinar el mensaje (satellites.satcluster.getMessage)",
 		},
 		{
 			"Celda sin poder determinar",
 			Satmanager{},
 			"",
-			"Cluster no inicializado (satellities.Satmanager.GetMessage)",
+			"Cluster no inicializado (satellite.Satmanager.GetMessage)",
 		},
 	}
 
@@ -369,22 +376,32 @@ func TestGetLocation(t *testing.T) {
 	}{
 		{
 			"Test superpuestos",
-			Satmanager{cluster: &satcluster{Satellities: []satellitie{
-				satellitie{Pos: &vectors.Vector2{X: 5, Y: 5}, Distance: 5},
-				satellitie{Pos: &vectors.Vector2{X: 5, Y: 5}, Distance: 5},
-				satellitie{Pos: &vectors.Vector2{X: 5, Y: 5}, Distance: 5},
+			Satmanager{cluster: &satcluster{Satellites: []satellite{
+				satellite{Pos: &vectors.Vector2{X: 5, Y: 5}, Distance: 5},
+				satellite{Pos: &vectors.Vector2{X: 5, Y: 5}, Distance: 5},
+				satellite{Pos: &vectors.Vector2{X: 5, Y: 5}, Distance: 5},
 			}}},
 			vectors.GetEmptyVector2(),
 			"Infinitas intersecciones: Los circulos se encuentran superpuestos con igual radio (geometry.IsCirclesIntersectionPossible)",
 		},
 		{
 			"Test ok",
-			Satmanager{cluster: &satcluster{Satellities: []satellitie{
-				satellitie{Pos: &vectors.Vector2{X: 5, Y: 0}, Distance: 5},
-				satellitie{Pos: &vectors.Vector2{X: -5, Y: 0}, Distance: 5},
-				satellitie{Pos: &vectors.Vector2{X: 0, Y: -5}, Distance: 5},
+			Satmanager{cluster: &satcluster{Satellites: []satellite{
+				satellite{Pos: &vectors.Vector2{X: 5, Y: 0}, Distance: 5},
+				satellite{Pos: &vectors.Vector2{X: -5, Y: 0}, Distance: 5},
+				satellite{Pos: &vectors.Vector2{X: 0, Y: -5}, Distance: 5},
 			}}},
 			vectors.Vector2{X: 0, Y: 0},
+			"",
+		},
+		{
+			"Test ok 2",
+			Satmanager{cluster: &satcluster{Satellites: []satellite{
+				satellite{Pos: &vectors.Vector2{X: -500, Y: -200}, Distance: 632.4560821},
+				satellite{Pos: &vectors.Vector2{X: 100, Y: -100}, Distance: 100},
+				satellite{Pos: &vectors.Vector2{X: 500, Y: 100}, Distance: 412.31},
+			}}},
+			vectors.Vector2{X: 100.000579, Y: 0},
 			"",
 		},
 	}

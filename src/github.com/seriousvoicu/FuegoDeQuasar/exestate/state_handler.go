@@ -24,12 +24,12 @@ type State struct {
 }
 
 func UncontrolledError(UserError string, err error) *State {
-	//fmt.Println("User err: " + UserError + " --- errTxt:" + err.Error())
+	fmt.Println("User err: " + UserError + " --- errTxt:" + err.Error())
 	return &State{UncontrolledCode, "User err: " + UserError + " --- errTxt: " + err.Error(), err}
 }
 
 func ControlledError(UserError string) *State {
-	//fmt.Println("User err: " + UserError)
+	fmt.Println("User err: " + UserError)
 	return &State{ControlledCode, UserError, nil}
 }
 
@@ -47,7 +47,9 @@ func StateEvalJson(w http.ResponseWriter, sth StateHandler) bool {
 		fmt.Println(sth.GetState(false).UserError)
 
 		w.WriteHeader(http.StatusNotFound)
-		json.NewEncoder(w).Encode(sth.GetState(false).UserError)
+		json.NewEncoder(w).Encode(sth.GetState(true).UserError)
+
+		//json.NewEncoder(w).Encode("Ha ocurrido un error")
 
 		return true
 	}
@@ -58,7 +60,7 @@ func StateEvalJson(w http.ResponseWriter, sth StateHandler) bool {
 func StateEval(sth StateHandler, err error, userError string) bool {
 
 	if OnError(sth) {
-		fmt.Println(sth.GetState(false).UserError)
+		fmt.Println(sth.GetState(true).UserError)
 
 		return true
 	}

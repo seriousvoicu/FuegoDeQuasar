@@ -5,19 +5,6 @@ import (
 )
 
 func TestMergeStringArrays(t *testing.T) {
-
-	/*	//Teniendo dos arreglos, modificar el mas largo de estos para que coincide an tamaño al mas pequeño
-			     []string{" ", "b", " ", " ", "c", " ", " ", "d"}, + 4
-		         []string{"a", " ", "c", "d"},
-		    //Verifico punto de anclaje
-		[]string{" ", "b", " ", " ", "c", " ", " ", "d"}, + 4
-			      []string{"a", " ", "c", "d"},
-			//Evaluo la cantidad de espacios a borrar de cada uno de los lados del anclaje
-			2 y 2
-
-			//Verifico en cada posicion si hay match, si no hay y hay espacio en blanco, borro en el arreglo mas largo
-			          []string{" ", "b", "c", "d"}, + 4
-					  []string{"a", " ", "c", "d"},*/
 	var testTable = []struct {
 		testName string
 		arrayA   []string

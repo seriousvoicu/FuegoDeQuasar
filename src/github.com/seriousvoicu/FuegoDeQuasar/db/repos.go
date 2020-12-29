@@ -10,7 +10,7 @@ import (
 
 type SatellitiesRepoInterface interface {
 	GetAllSatellities() *[]SatellitiesRow
-	SatellitiesCount() *int
+	SatellitiesCount() int
 	GetWithName(name string) *SatellitiesRow
 	exestate.StateHandler
 }
@@ -32,18 +32,18 @@ func (this *SatellitiesRepo) /*StateHandler.*/ GetState(consume bool) *exestate.
 	return state
 }
 
-func (this *SatellitiesRepo) SatellitiesCount() *int {
+func (this *SatellitiesRepo) SatellitiesCount() int {
 	if exestate.OnError(this) {
-		return nil
+		return -1
 	}
 
 	var count int
 
-	sqlDb, err := sql.Open("sqlite3", "mainDB.db")
+	sqlDb, err := sql.Open("sqlite3", "db/mainDB.db")
 
 	if err != nil {
 		this.RegisterState(exestate.UncontrolledError("No se pudo abrir la base", err))
-		return nil
+		return -1
 	}
 
 	defer sqlDb.Close()
@@ -52,10 +52,10 @@ func (this *SatellitiesRepo) SatellitiesCount() *int {
 
 	if err != nil {
 		this.RegisterState(exestate.UncontrolledError("No se pudo leer de la base", err))
-		return nil
+		return -1
 	}
 
-	return &count
+	return count
 }
 
 func (this *SatellitiesRepo) GetAllSatellities() *[]SatellitiesRow {
@@ -69,7 +69,7 @@ func (this *SatellitiesRepo) GetAllSatellities() *[]SatellitiesRow {
 		return nil
 	}
 
-	sqlDb, err := sql.Open("sqlite3", "mainDB.db")
+	sqlDb, err := sql.Open("sqlite3", "db/mainDB.db")
 
 	if err != nil {
 		this.RegisterState(exestate.UncontrolledError("No se pudo abrir la base", err))
@@ -85,7 +85,7 @@ func (this *SatellitiesRepo) GetAllSatellities() *[]SatellitiesRow {
 		return nil
 	}
 
-	allRows := make([]SatellitiesRow, *count)
+	allRows := make([]SatellitiesRow, count)
 
 	var id int
 	var name string
@@ -107,7 +107,7 @@ func (this *SatellitiesRepo) GetWithName(name string) *SatellitiesRow {
 		return nil
 	}
 
-	sqlDb, err := sql.Open("sqlite3", "mainDB.db")
+	sqlDb, err := sql.Open("sqlite3", "db/mainDB.db")
 
 	if err != nil {
 		this.RegisterState(exestate.UncontrolledError("No se pudo abrir la base (db.db.GetWithName)", err))

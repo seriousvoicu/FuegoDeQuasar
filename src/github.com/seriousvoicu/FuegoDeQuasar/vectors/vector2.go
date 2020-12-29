@@ -10,7 +10,7 @@ import (
 type Vector2 struct {
 	X     float64 `json:"x"`
 	Y     float64 `json:"y"`
-	Empty bool
+	Empty bool    `json:"-"`
 
 	currState *exestate.State
 }
@@ -59,6 +59,7 @@ func (this *Vector2) DistanceTo(posB *Vector2) float64 {
 	return math.Hypot(posB.X-this.X, posB.Y-this.Y)
 }
 
+//Para el testing
 func (this *Vector2) ToString() string {
 	if exestate.OnError(this) {
 		return "X: - Y: -"
@@ -82,10 +83,6 @@ func Equals(vectorA Vector2, vectorB Vector2) (bool, *exestate.State) {
 	if vectorA.IsEmpty() || vectorB.IsEmpty() {
 		return false, exestate.ControlledError("Almenos uno de los vectores se encuentra vacio (vectors.Vector2.Equals)")
 	}
-
-	/*if vectorA.X == nil || vectorA.Y == nil || vectorB.X == nil || vectorB.Y == nil {
-		return false, exestate.ControlledError("Almenos uno de los vectores se sin una de sus cordenadas definidas (vectors.Vector2.Equals)")
-	}*/
 
 	if math.Abs(vectorA.X-vectorB.X) < 0.001 && math.Abs(vectorA.Y-vectorB.Y) < 0.001 {
 		return true, exestate.Ok()
